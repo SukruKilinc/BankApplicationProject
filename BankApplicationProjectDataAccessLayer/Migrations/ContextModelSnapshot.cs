@@ -71,6 +71,9 @@ namespace BankApplicationProjectDataAccessLayer.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ConfirmCode")
+                        .HasColumnType("int");
+
                     b.Property<string>("District")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -180,6 +183,10 @@ namespace BankApplicationProjectDataAccessLayer.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ProcessDate")
                         .HasColumnType("datetime2");
 
@@ -187,9 +194,53 @@ namespace BankApplicationProjectDataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ReceiverID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SenderID")
+                        .HasColumnType("int");
+
                     b.HasKey("CustomerAccountProcessID");
 
+                    b.HasIndex("ReceiverID");
+
+                    b.HasIndex("SenderID");
+
                     b.ToTable("CustomerAccountProcesses");
+                });
+
+            modelBuilder.Entity("BankApplicationProjectEntityLayer.Concrete.ElectricBill", b =>
+                {
+                    b.Property<int>("ElectricBillID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ElectricBillID"), 1L, 1);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BillingPeriod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContractNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PaidStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("PaymentDueDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ElectricBillID");
+
+                    b.ToTable("ElectricBills");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -297,13 +348,28 @@ namespace BankApplicationProjectDataAccessLayer.Migrations
 
             modelBuilder.Entity("BankApplicationProjectEntityLayer.Concrete.CustomerAccount", b =>
                 {
-                    b.HasOne("BankApplicationProjectEntityLayer.Concrete.AppUser", "Appuser")
+                    b.HasOne("BankApplicationProjectEntityLayer.Concrete.AppUser", "AppUser")
                         .WithMany("CustomerAccounts")
                         .HasForeignKey("AppUserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Appuser");
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("BankApplicationProjectEntityLayer.Concrete.CustomerAccountProcess", b =>
+                {
+                    b.HasOne("BankApplicationProjectEntityLayer.Concrete.CustomerAccount", "ReceiverCustomer")
+                        .WithMany("CustomerReceiver")
+                        .HasForeignKey("ReceiverID");
+
+                    b.HasOne("BankApplicationProjectEntityLayer.Concrete.CustomerAccount", "SenderCustomer")
+                        .WithMany("CustomerSender")
+                        .HasForeignKey("SenderID");
+
+                    b.Navigation("ReceiverCustomer");
+
+                    b.Navigation("SenderCustomer");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -360,6 +426,13 @@ namespace BankApplicationProjectDataAccessLayer.Migrations
             modelBuilder.Entity("BankApplicationProjectEntityLayer.Concrete.AppUser", b =>
                 {
                     b.Navigation("CustomerAccounts");
+                });
+
+            modelBuilder.Entity("BankApplicationProjectEntityLayer.Concrete.CustomerAccount", b =>
+                {
+                    b.Navigation("CustomerReceiver");
+
+                    b.Navigation("CustomerSender");
                 });
 #pragma warning restore 612, 618
         }
